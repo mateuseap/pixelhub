@@ -11,7 +11,7 @@
   "scripts": {
     "dev": "concurrently \"pnpm --filter @pixelhub/server dev\" \"pnpm --filter @pixelhub/client dev\"",
     "build": "pnpm --filter @pixelhub/shared build && pnpm --filter @pixelhub/server build && pnpm --filter @pixelhub/client build",
-    "test": "pnpm --filter @pixelhub/shared test && pnpm --filter @pixelhub/server test",
+    "test": "pnpm --filter @pixelhub/shared test && pnpm --filter @pixelhub/server test && pnpm --filter @pixelhub/client test",
     "typecheck": "pnpm --filter @pixelhub/shared typecheck && pnpm --filter @pixelhub/server typecheck && pnpm --filter @pixelhub/client typecheck"
   },
   "devDependencies": {
