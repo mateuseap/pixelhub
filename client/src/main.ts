@@ -8,18 +8,53 @@ import { setupJoinScreen } from './ui/joinScreen';
 
 const NEARBY_REFRESH_MS = 300;
 
+/**
+ * The game renders at half resolution and is scaled up 2x with nearest
+ * neighbor filtering. Pixel art looks right chunky, and the GPU pushes 4x
+ * fewer fragments per frame, which is what keeps weak iGPUs at 60 fps.
+ */
+const RENDER_ZOOM = 2;
+
 function startGame(room: Room): void {
   const scene = new WorldScene(room);
 
-  new Phaser.Game({
+  const parent = document.getElementById('game');
+  if (!parent) {
+    throw new Error('Missing required element #game');
+  }
+  const viewSize = (): { width: number; height: number } => ({
+    width: Math.max(160, Math.floor(parent.clientWidth / RENDER_ZOOM)),
+    height: Math.max(120, Math.floor(parent.clientHeight / RENDER_ZOOM)),
+  });
+
+  const initial = viewSize();
+  const game = new Phaser.Game({
     type: Phaser.AUTO,
     parent: 'game',
-    backgroundColor: '#14151f',
+    banner: false,
+    backgroundColor: '#17131d',
+    pixelArt: true,
+    render: { powerPreference: 'high-performance' },
     scale: {
-      mode: Phaser.Scale.RESIZE,
-      autoCenter: Phaser.Scale.CENTER_BOTH,
+      mode: Phaser.Scale.NONE,
+      zoom: RENDER_ZOOM,
+      width: initial.width,
+      height: initial.height,
     },
     scene,
+  });
+
+  let resizeQueued = false;
+  window.addEventListener('resize', () => {
+    if (resizeQueued) {
+      return;
+    }
+    resizeQueued = true;
+    requestAnimationFrame(() => {
+      resizeQueued = false;
+      const next = viewSize();
+      game.scale.resize(next.width, next.height);
+    });
   });
 
   const chat = setupChatPanel({
