@@ -1,0 +1,23 @@
+# Local production-like stack: nginx-served client proxying /colyseus to the
+# server container. For day-to-day development prefer `pnpm dev` (see README).
+services:
+  server:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.server
+    container_name: pixelhub_server_dev
+    environment:
+      NODE_ENV: production
+      PORT: '2567'
+    ports:
+      - '2567:2567'
+
+  client:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.client
+    container_name: pixelhub_client_dev
+    depends_on:
+      - server
+    ports:
+      - '8080:80'
