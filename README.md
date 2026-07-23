@@ -57,7 +57,7 @@ Other useful commands:
 
 ```bash
 pnpm -r build   # build shared, server, and client
-pnpm test       # shared unit tests + server room tests (vitest)
+pnpm test       # shared unit + server room + client (jsdom) tests (vitest)
 pnpm typecheck  # typecheck all packages
 ```
 
