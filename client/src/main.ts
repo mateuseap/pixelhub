@@ -97,6 +97,9 @@ function startGame(room: Room): void {
  * Wires proximity voice: the server sends LiveKit credentials only when
  * voice is configured, so a voiceless deployment never shows the UI.
  */
+/** Remembers the player's voice choice across page refreshes. */
+const VOICE_PREF_KEY = 'pixelhub-voice';
+
 function setupVoice(room: Room, scene: WorldScene): void {
   const applySpeakingStates = (): void => {
     const speaking = new Set<string>();
@@ -117,7 +120,12 @@ function setupVoice(room: Room, scene: WorldScene): void {
     },
   });
   const voice = new VoiceManager({
-    onStatusChanged: (status, detail) => controls.setStatus(status, detail),
+    onStatusChanged: (status, detail) => {
+      controls.setStatus(status, detail);
+      if (status === 'live' || status === 'muted') {
+        localStorage.setItem(VOICE_PREF_KEY, status);
+      }
+    },
     onPeersChanged: applySpeakingStates,
   });
 
@@ -125,6 +133,13 @@ function setupVoice(room: Room, scene: WorldScene): void {
     voice.setCredentials(payload);
     controls.show();
     controls.setStatus('off');
+    // Rejoin voice automatically when the player had it on before a refresh.
+    // The mic permission dialog only reappears if the browser was told to
+    // allow it one time only.
+    const pref = localStorage.getItem(VOICE_PREF_KEY);
+    if (pref === 'live' || pref === 'muted') {
+      void voice.restore(pref);
+    }
   });
   room.onLeave(() => {
     void voice.disconnect();

@@ -61,6 +61,35 @@ export class VoiceManager {
     this.credentials = payload;
   }
 
+  /**
+   * Restores a previous session's voice state after a page refresh:
+   * 'live' reconnects and publishes the mic; 'muted' reconnects listen-only
+   * (hearing nearby peers) without ever opening the microphone.
+   */
+  async restore(target: 'live' | 'muted'): Promise<void> {
+    if (this.currentStatus !== 'off' || !this.credentials) {
+      return;
+    }
+    if (target === 'live') {
+      await this.enable();
+      return;
+    }
+    this.setStatus('connecting');
+    try {
+      if (!this.room) {
+        this.room = this.createRoom();
+        await this.room.connect(this.credentials.url, this.credentials.token, {
+          autoSubscribe: false,
+        });
+        this.applyProximity(this.lastPeers);
+      }
+      this.setStatus('muted');
+    } catch {
+      await this.disconnect();
+      this.setStatus('off');
+    }
+  }
+
   get available(): boolean {
     return this.credentials !== null;
   }
@@ -221,6 +250,17 @@ export class VoiceManager {
       .on(RoomEvent.ActiveSpeakersChanged, () => this.callbacks.onPeersChanged())
       .on(RoomEvent.ParticipantConnected, () => this.callbacks.onPeersChanged())
       .on(RoomEvent.ParticipantDisconnected, () => this.callbacks.onPeersChanged())
+      .on(RoomEvent.AudioPlaybackStatusChanged, () => {
+        // Browsers block audio playback before a user gesture on restored
+        // sessions; resume on the first interaction.
+        if (!room.canPlaybackAudio) {
+          const resume = (): void => {
+            void room.startAudio();
+          };
+          document.addEventListener('pointerdown', resume, { once: true });
+          document.addEventListener('keydown', resume, { once: true });
+        }
+      })
       .on(RoomEvent.Reconnecting, () => this.setStatus('reconnecting'))
       .on(RoomEvent.Reconnected, () => {
         this.setStatus(room.localParticipant.isMicrophoneEnabled ? 'live' : 'muted');
