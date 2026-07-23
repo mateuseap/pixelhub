@@ -5,9 +5,12 @@ import { defineConfig } from 'vite';
 // nginx location used in Docker/Kubernetes.
 export default defineConfig({
   resolve: {
-    alias: {
-      '@pixelhub/shared': resolve(__dirname, '../shared/src/index.ts'),
-    },
+    alias: [
+      { find: '@pixelhub/shared', replacement: resolve(__dirname, '../shared/src/index.ts') },
+      // Ship the official terser-minified Phaser build via a small shim
+      // (about 400 kB smaller than re-minifying the readable ESM dist).
+      { find: /^phaser$/, replacement: resolve(__dirname, 'src/phaserShim.ts') },
+    ],
   },
   server: {
     port: 5173,
@@ -21,6 +24,13 @@ export default defineConfig({
     },
   },
   build: {
-    chunkSizeWarningLimit: 1800,
+    target: 'es2020',
+    chunkSizeWarningLimit: 1600,
+    rollupOptions: {
+      output: {
+        // Phaser in its own chunk: app changes never bust the engine cache.
+        manualChunks: { phaser: ['phaser'] },
+      },
+    },
   },
 });
