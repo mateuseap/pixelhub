@@ -29,6 +29,10 @@ ENV PORT=2567
 
 WORKDIR /app/server
 
+# Drop root: the node:alpine image ships an unprivileged `node` user (uid 1000).
+# The server only binds port 2567 (> 1024) and needs no elevated privileges.
+USER node
+
 EXPOSE 2567
 
 CMD ["node", "dist/index.js"]
