@@ -4,8 +4,9 @@ A [Gather.town](https://gather.town)-style virtual space: walk a 2D pixel-art
 world with your avatar, and when you get close to people, you can talk —
 proximity text chat and spatial audio.
 
-> **Status**: design phase. The deployment target already exists — pixelhub
-> ships to [homelab](https://github.com/mateuseap/homelab) at
+> **Status**: MVP — walkable world + proximity text chat. The deployment
+> target already exists — pixelhub ships to
+> [homelab](https://github.com/mateuseap/homelab) at
 > `pixelhub.lab.mateuseap.com` as `apps/pixelhub/`.
 
 ## v1 scope
@@ -25,11 +26,34 @@ proximity text chat and spatial audio.
 | Audio | [LiveKit](https://livekit.io/) (self-hosted) | SFU with per-track subscribe → proximity = subscribe/unsubscribe |
 | Monorepo | pnpm workspaces (`client` / `server` / `shared`) | Same layout as [chesskernel](https://github.com/mateuseap/chesskernel) |
 
+## Run locally
+
+Requirements: Node >= 20 and pnpm >= 8 (`corepack enable` sets up pnpm).
+
+```bash
+pnpm install
+pnpm dev        # server on :2567 + Vite client on http://localhost:5173
+```
+
+The client always talks to the server via the same-origin `/colyseus` path —
+Vite proxies it in dev, nginx proxies it in Docker/Kubernetes.
+
+Other useful commands:
+
+```bash
+pnpm -r build   # build shared, server, and client
+pnpm test       # shared unit tests + server room tests (vitest)
+pnpm typecheck  # typecheck all packages
+
+# Production-like stack (nginx client on http://localhost:8080)
+docker compose -f docker-compose.dev.yml up --build
+```
+
 ## Roadmap
 
-- [ ] **M0 — design**: brainstorm → spec → implementation plan (docs/)
-- [ ] **M1 — walkable world**: map renders, avatars move and see each other
-- [ ] **M2 — proximity text chat**
+- [x] **M0 — design**: brainstorm → spec → implementation plan (docs/)
+- [x] **M1 — walkable world**: map renders, avatars move and see each other
+- [x] **M2 — proximity text chat**
 - [ ] **M3 — proximity audio** (LiveKit, audio-only)
 - [ ] **M4 — deploy**: `apps/pixelhub/` in homelab, TLS, monitoring
 - [ ] **M5+ — later**: video, screen share, map editor, private zones

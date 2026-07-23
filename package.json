@@ -1,0 +1,25 @@
+{
+  "name": "pixelhub",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Gather.town-style 2D virtual space with proximity chat",
+  "workspaces": [
+    "client",
+    "server",
+    "shared"
+  ],
+  "scripts": {
+    "dev": "concurrently \"pnpm --filter @pixelhub/server dev\" \"pnpm --filter @pixelhub/client dev\"",
+    "build": "pnpm --filter @pixelhub/shared build && pnpm --filter @pixelhub/server build && pnpm --filter @pixelhub/client build",
+    "test": "pnpm --filter @pixelhub/shared test && pnpm --filter @pixelhub/server test",
+    "typecheck": "pnpm --filter @pixelhub/shared typecheck && pnpm --filter @pixelhub/server typecheck && pnpm --filter @pixelhub/client typecheck"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  },
+  "engines": {
+    "node": ">=20.0.0",
+    "pnpm": ">=8.0.0"
+  },
+  "packageManager": "pnpm@8.15.6"
+}

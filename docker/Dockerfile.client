@@ -1,0 +1,22 @@
+FROM node:20-alpine AS builder
+
+WORKDIR /build
+
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+COPY shared/package.json ./shared/
+COPY client/package.json ./client/
+
+RUN npm install -g pnpm@8 && pnpm install --frozen-lockfile
+
+COPY shared/ ./shared/
+COPY client/ ./client/
+
+RUN pnpm --filter @pixelhub/shared build
+RUN pnpm --filter @pixelhub/client build
+
+FROM nginx:alpine AS runner
+
+COPY --from=builder /build/client/dist /usr/share/nginx/html
+COPY docker/nginx/nginx.client.conf /etc/nginx/conf.d/default.conf
+
+EXPOSE 80
