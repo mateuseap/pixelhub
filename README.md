@@ -5,7 +5,9 @@
 **A virtual space you can actually walk around in.**  
 2D pixel world · Proximity chat · Self-hosted
 
-[![CI](https://github.com/mateuseap/pixelhub/actions/workflows/publish-images.yml/badge.svg)](https://github.com/mateuseap/pixelhub/actions)
+[![CI](https://github.com/mateuseap/pixelhub/actions/workflows/ci.yml/badge.svg)](https://github.com/mateuseap/pixelhub/actions)
+[![Publish Images](https://github.com/mateuseap/pixelhub/actions/workflows/publish-images.yml/badge.svg)](https://github.com/mateuseap/pixelhub/actions)
+[![version](https://badgen.net/github/tag/mateuseap/pixelhub?label=version&color=96bc4b)](https://github.com/mateuseap/pixelhub/releases)
 [![license](https://badgen.net/github/license/mateuseap/pixelhub?color=5ba3b0)](LICENSE)
 [![stars](https://badgen.net/github/stars/mateuseap/pixelhub)](https://github.com/mateuseap/pixelhub/stargazers)
 [![visitors](https://visitor-badge.laobi.icu/badge?page_id=mateuseap.pixelhub)](https://github.com/mateuseap/pixelhub)
@@ -36,6 +38,29 @@ Video calls put everyone in a grid; real rooms let you drift between conversatio
 | 🛡 **Input Validation** | Name/message limits, sanitized movement, 5 msg/5s rate limit |
 | 🎙 **Proximity Voice** | Self-hosted LiveKit SFU, audio-only Opus, volume falls off with distance |
 | 🐳 **Docker-first** | Multi-stage images, nginx WebSocket proxy, GHCR publishing |
+
+## Architecture
+
+Three packages: a Phaser 3 client, an authoritative Colyseus server, and a shared pure-TypeScript core (map, collision, proximity, validation) that both sides import. The browser reaches the server through the client's nginx proxy; voice runs peer-to-SFU through self-hosted LiveKit.
+
+```mermaid
+flowchart LR
+    browser(["browser: Phaser 3 client"])
+    nginx["nginx client pod<br/>static assets + /colyseus proxy"]
+    server["Colyseus server :2567<br/>authoritative state, 20 ticks/s"]
+    shared["@pixelhub/shared<br/>map, collision, proximity, validation"]
+    livekit["LiveKit SFU<br/>audio-only, by avatar distance"]
+
+    browser -->|HTTPS static| nginx
+    browser <-->|/colyseus WebSocket| nginx
+    nginx <--> server
+    server -.->|imports| shared
+    browser -.->|imports| shared
+    browser <-->|WebRTC audio| livekit
+    server -->|mints access tokens| livekit
+```
+
+Movement and chat are validated server-side at 20 ticks per second; the client predicts and interpolates. Chat and voice are proximity-scoped in `@pixelhub/shared`, so who you hear and read is a pure function of avatar distance. See [docs/architecture](docs/architecture/overview.md) for the full design.
 
 ## Quick Start
 

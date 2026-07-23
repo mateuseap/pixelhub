@@ -1,0 +1,31 @@
+name: CI
+
+# Typecheck, tests, and build on every PR and every push to main.
+# Mirrors the CI in mateuseap/chesskernel so both apps gate the same way.
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm build      # shared builds first so typecheck and tests resolve @pixelhub/shared
+      - run: pnpm typecheck
+      - run: pnpm test
