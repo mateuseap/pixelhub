@@ -13,7 +13,7 @@ import {
 import type { Room } from 'colyseus.js';
 import { playersOf, type RemotePlayerState } from '../net/roomState';
 import { PlayerSprite } from './PlayerSprite';
-import { TEXTURE_WORLD, createAvatarTexture, createWorldTexture } from './textures';
+import { TEXTURE_WORLD, createAvatarTextures, createWorldTexture } from './textures';
 
 interface TrackedPlayer {
   readonly sprite: PlayerSprite;
@@ -38,14 +38,15 @@ export class WorldScene extends Phaser.Scene {
   }
 
   create(): void {
-    createWorldTexture(this);
-    createAvatarTexture(this);
+    createWorldTexture(this, this.map);
+    createAvatarTextures(this);
     this.add.image(0, 0, TEXTURE_WORLD).setOrigin(0, 0);
 
     const worldW = this.map.width * TILE_SIZE;
     const worldH = this.map.height * TILE_SIZE;
     this.cameras.main.setBounds(0, 0, worldW, worldH);
-    this.cameras.main.setBackgroundColor('#14151f');
+    this.cameras.main.setBackgroundColor('#17131d');
+    this.cameras.main.setRoundPixels(true);
 
     const keyboard = this.input.keyboard;
     if (keyboard) {
@@ -62,21 +63,27 @@ export class WorldScene extends Phaser.Scene {
     players.onRemove((_player, sessionId) => this.removePlayer(sessionId));
   }
 
-  update(_time: number, dtMs: number): void {
+  update(time: number, dtMs: number): void {
     const input = this.readInput();
     if (!inputsEqual(input, this.lastSent)) {
       this.room.send(MessageType.Input, input);
       this.lastSent = input;
     }
 
+    const localMoving = input.up || input.down || input.left || input.right;
     const smoothing = 1 - Math.exp(-dtMs * 0.012);
     this.players.forEach((tracked) => {
       if (tracked.isLocal) {
         this.updateLocal(tracked, input, dtMs);
+        tracked.sprite.updateWalk(time, localMoving);
       } else {
+        const distX = tracked.target.x - tracked.sprite.x;
+        const distY = tracked.target.y - tracked.sprite.y;
+        const moving = distX * distX + distY * distY > 1;
         const x = Phaser.Math.Linear(tracked.sprite.x, tracked.target.x, smoothing);
         const y = Phaser.Math.Linear(tracked.sprite.y, tracked.target.y, smoothing);
         tracked.sprite.setPosition(x, y);
+        tracked.sprite.updateWalk(time, moving);
       }
     });
   }
@@ -135,8 +142,9 @@ export class WorldScene extends Phaser.Scene {
   }
 
   private removePlayer(sessionId: string): void {
-    this.players.get(sessionId)?.sprite.destroy();
+    const tracked = this.players.get(sessionId);
     this.players.delete(sessionId);
+    tracked?.sprite.fadeOut(() => tracked.sprite.destroy());
   }
 
   private readInput(): MovementInput {
