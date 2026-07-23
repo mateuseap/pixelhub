@@ -110,6 +110,13 @@ export class WorldScene extends Phaser.Scene {
     this.players.get(sessionId)?.sprite.showBubble(text);
   }
 
+  /** Applies voice speaking indicators; keys are sessionIds (identities). */
+  applySpeaking(speaking: ReadonlySet<string>): void {
+    this.players.forEach((tracked, sessionId) => {
+      tracked.sprite.setSpeaking(speaking.has(sessionId));
+    });
+  }
+
   private updateLocal(tracked: TrackedPlayer, input: MovementInput, dtMs: number): void {
     const current = this.predicted ?? tracked.target;
     const stepped = stepPlayer(this.map, current, input, dtMs);

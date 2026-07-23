@@ -13,6 +13,7 @@ import {
   stepPlayer,
   validateChatMessage,
   validateDisplayName,
+  type AudioTokenPayload,
   type ChatBroadcast,
   type ChatError,
   type JoinOptions,
@@ -23,6 +24,8 @@ import {
   PLAYER_COLORS,
 } from '@pixelhub/shared';
 import { Client, Room, ServerError } from 'colyseus';
+import { issueLiveKitToken } from '../audio/livekit';
+import { loadConfig, type LiveKitConfig } from '../config';
 import { Player, WorldState } from './schema/WorldState';
 
 /** Per-session server-side bookkeeping (never synced to clients). */
@@ -37,9 +40,13 @@ export class WorldRoom extends Room<WorldState> {
   private readonly map: WorldMap = createWorldMap();
   private sessions = new Map<string, SessionData>();
   private joinCounter = 0;
+  private livekit: LiveKitConfig | null = null;
 
   onCreate(): void {
     this.setState(new WorldState());
+    // Voice is opt-in via LIVEKIT_* env vars; without them the world runs
+    // exactly as before (no token messages, no client voice UI).
+    this.livekit = loadConfig().livekit;
 
     this.onMessage(MessageType.Input, (client, payload: unknown) => {
       this.handleInput(client, payload);
@@ -75,6 +82,31 @@ export class WorldRoom extends Room<WorldState> {
     this.state.players.set(client.sessionId, player);
 
     this.sessions.set(client.sessionId, { input: IDLE_INPUT, chatLimit: EMPTY_RATE_LIMIT });
+    this.sendAudioToken(client, auth.name);
+  }
+
+  /**
+   * Issues LiveKit credentials for this player, fire-and-forget: a token
+   * failure only disables voice for that client, never the whole join.
+   */
+  private sendAudioToken(client: Client, displayName: string): void {
+    const livekit = this.livekit;
+    if (!livekit) {
+      return;
+    }
+    issueLiveKitToken(livekit, client.sessionId, displayName)
+      .then((token) => {
+        // The client may have left while the token was being signed.
+        if (!this.sessions.has(client.sessionId)) {
+          return;
+        }
+        const payload: AudioTokenPayload = { token, url: livekit.url };
+        client.send(MessageType.AudioToken, payload);
+      })
+      .catch((error: unknown) => {
+        // eslint-disable-next-line no-console
+        console.error(`Failed to issue LiveKit token for ${client.sessionId}`, error);
+      });
   }
 
   onLeave(client: Client): void {

@@ -5,6 +5,7 @@ import {
   PLAYER_HITBOX,
   ROOM_NAME,
   TILE_SIZE,
+  type AudioTokenPayload,
   type ChatBroadcast,
   type ChatError,
 } from '@pixelhub/shared';
@@ -200,5 +201,44 @@ describe('WorldRoom', () => {
       expect(await chats).toHaveLength(5);
       expect((await errors).length).toBeGreaterThanOrEqual(2);
     });
+  });
+
+  describe('voice tokens', () => {
+    it('does not send audio tokens when LiveKit is not configured', async () => {
+      const room = await colyseus.createRoom<WorldState>(ROOM_NAME, {});
+      const client = await colyseus.connectTo(room, { name: 'Quiet' });
+      const tokens = await collectMessages<AudioTokenPayload>(
+        client,
+        MessageType.AudioToken,
+        400,
+      );
+      expect(tokens).toHaveLength(0);
+    });
+
+    it('sends LiveKit credentials after join when LIVEKIT_* are set', async () => {
+      process.env.LIVEKIT_URL = 'wss://livekit.example.test';
+      process.env.LIVEKIT_API_KEY = 'test-api-key';
+      process.env.LIVEKIT_API_SECRET = 'test-api-secret-0123456789abcdef0123456789abcdef';
+      try {
+        const room = await colyseus.createRoom<WorldState>(ROOM_NAME, {});
+        const client = await colyseus.connectTo(room, { name: 'Talker' });
+        const payload = await waitForMessage<AudioTokenPayload>(
+          client,
+          MessageType.AudioToken,
+        );
+        expect(payload.url).toBe('wss://livekit.example.test');
+        expect(payload.token.split('.')).toHaveLength(3);
+        const claims = JSON.parse(
+          Buffer.from(payload.token.split('.')[1], 'base64url').toString('utf8'),
+        ) as { sub?: string; video?: { room?: string } };
+        expect(claims.sub).toBe(client.sessionId);
+        expect(claims.video?.room).toBe(ROOM_NAME);
+      } finally {
+        delete process.env.LIVEKIT_URL;
+        delete process.env.LIVEKIT_API_KEY;
+        delete process.env.LIVEKIT_API_SECRET;
+      }
+    });
+
   });
 });

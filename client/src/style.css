@@ -311,3 +311,52 @@ kbd {
   font-size: 0.85rem !important;
   font-style: normal;
 }
+
+/* Voice section of the side panel */
+.voice {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 10px 12px;
+  border-top: 1px solid rgba(242, 234, 216, 0.08);
+}
+
+.voice.hidden {
+  display: none;
+}
+
+.voice__button {
+  align-self: stretch;
+  padding: 9px 14px;
+  font: inherit;
+  font-size: 0.9rem;
+  color: #17131d;
+  background: #e8b04b;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: filter 120ms ease;
+}
+
+.voice__button:hover:not(:disabled) {
+  filter: brightness(1.08);
+}
+
+.voice__button:disabled {
+  opacity: 0.6;
+  cursor: wait;
+}
+
+.voice__button.is-live {
+  background: #6fbf8f;
+}
+
+.voice__status {
+  margin: 0;
+  font-size: 0.78rem;
+  color: rgba(242, 234, 216, 0.65);
+}
+
+.voice__status.error {
+  color: #e07a6a;
+}

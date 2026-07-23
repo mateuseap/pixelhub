@@ -34,7 +34,7 @@ Video calls put everyone in a grid; real rooms let you drift between conversatio
 | 💬 **Proximity Chat** | Messages reach only players within 5 tiles, filtered server-side |
 | 🫧 **Speech Bubbles** | See who is talking above their avatar |
 | 🛡 **Input Validation** | Name/message limits, sanitized movement, 5 msg/5s rate limit |
-| 🎙 **Proximity Audio** | Next milestone: self-hosted LiveKit, audio-only Opus |
+| 🎙 **Proximity Voice** | Self-hosted LiveKit SFU, audio-only Opus, volume falls off with distance |
 | 🐳 **Docker-first** | Multi-stage images, nginx WebSocket proxy, GHCR publishing |
 
 ## Quick Start
@@ -63,6 +63,18 @@ pnpm typecheck  # typecheck all packages
 
 The client always talks to the server via the same-origin `/colyseus` path. Vite proxies it in dev, nginx proxies it in Docker/Kubernetes.
 
+## Voice chat
+
+Voice is opt-in per deployment. Without configuration the world runs silently and shows no voice UI.
+
+| Env var (server) | Meaning |
+|------------------|---------|
+| `LIVEKIT_URL` | Public wss URL of the LiveKit server |
+| `LIVEKIT_API_KEY` | API key id used to sign access tokens |
+| `LIVEKIT_API_SECRET` | API secret used to sign access tokens |
+
+When set, the server sends each player a scoped LiveKit token after join. The client shows an "Enable voice" button (microphone permission is requested only then), publishes audio-only, and subscribes exclusively to players within the proximity radius, with playback volume falling off linearly with distance. Speaking players get a green ring under their avatar.
+
 ## Stack
 
 | Layer | Technology |
@@ -70,7 +82,7 @@ The client always talks to the server via the same-origin `/colyseus` path. Vite
 | Rendering | Phaser 3, Vite, TypeScript |
 | Multiplayer | Colyseus 0.15 (authoritative rooms, schema state sync) |
 | Shared logic | Pure TypeScript package (map, collision, proximity, validation) |
-| Audio (M3) | LiveKit, self-hosted, audio-only |
+| Audio | LiveKit, self-hosted, audio-only |
 | DevOps | Docker, Nginx, GitHub Actions, GHCR |
 | Deployment | [homelab](https://github.com/mateuseap/homelab) GitOps cluster |
 
@@ -79,7 +91,7 @@ The client always talks to the server via the same-origin `/colyseus` path. Vite
 - [x] **M0** design: spec and architecture (docs/)
 - [x] **M1** walkable world: map renders, avatars move and see each other
 - [x] **M2** proximity text chat
-- [ ] **M3** proximity audio (LiveKit, audio-only)
+- [x] **M3** proximity audio (LiveKit, audio-only)
 - [x] **M4** deploy: `apps/pixelhub/` in homelab, TLS, monitoring
 - [ ] **M5+** later: video, screen share, map editor, private zones
 

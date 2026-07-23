@@ -17,7 +17,8 @@
     "@colyseus/tools": "^0.15.49",
     "@pixelhub/shared": "workspace:*",
     "colyseus": "^0.15.57",
-    "express": "^4.22.2"
+    "express": "^4.22.2",
+    "livekit-server-sdk": "^2.17.0"
   },
   "devDependencies": {
     "@colyseus/testing": "^0.15.4",

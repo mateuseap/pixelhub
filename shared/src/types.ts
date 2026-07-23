@@ -37,11 +37,21 @@ export interface ChatError {
   readonly reason: string;
 }
 
+/**
+ * Voice credentials sent to a client after join when LiveKit is configured.
+ * The token is scoped to the shared LiveKit room, identity = sessionId.
+ */
+export interface AudioTokenPayload {
+  readonly token: string;
+  readonly url: string;
+}
+
 /** Message types exchanged over the Colyseus room. */
 export const MessageType = {
   Input: 'input',
   Chat: 'chat',
   ChatError: 'chat-error',
+  AudioToken: 'audio-token',
 } as const;
 
 export type MessageTypeValue = (typeof MessageType)[keyof typeof MessageType];

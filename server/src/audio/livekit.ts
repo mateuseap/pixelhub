@@ -1,19 +1,39 @@
+import { ROOM_NAME } from '@pixelhub/shared';
+import { AccessToken, TrackSource } from 'livekit-server-sdk';
 import type { LiveKitConfig } from '../config';
 
 /**
- * TODO(M3 — proximity audio): LiveKit token issuance seam.
- *
- * Planned flow (see docs/ARCHITECTURE.md):
- *  1. Client joins the Colyseus room and requests an audio token.
- *  2. Server mints a LiveKit AccessToken (identity = sessionId, room = world)
- *     using `livekit-server-sdk`, with canPublish/canSubscribe audio-only.
- *  3. Client connects to the LiveKit SFU and subscribes/unsubscribes to peers
- *     as they enter/leave PROXIMITY_RADIUS, gain scaled by distance.
- *
- * Intentionally unimplemented in the MVP.
+ * Every player lands in a single LiveKit room; who you actually hear is
+ * decided client-side by proximity (see @pixelhub/shared computeAudioPeers).
  */
-export function issueLiveKitToken(config: LiveKitConfig | null, sessionId: string): never {
-  void config;
-  void sessionId;
-  throw new Error('Proximity audio is not available yet (planned for M3).');
+export const LIVEKIT_ROOM = ROOM_NAME;
+
+/** Tokens outlive any realistic session; LiveKit reuses them on reconnect. */
+const TOKEN_TTL = '12h';
+
+/**
+ * Mints a LiveKit access token for one player. Identity is the Colyseus
+ * sessionId (so audio peers map 1:1 to world avatars), display name is the
+ * validated player name. Grants are audio-only: the client may publish its
+ * microphone and subscribe to others, nothing else.
+ */
+export async function issueLiveKitToken(
+  config: LiveKitConfig,
+  sessionId: string,
+  displayName: string,
+): Promise<string> {
+  const token = new AccessToken(config.apiKey, config.apiSecret, {
+    identity: sessionId,
+    name: displayName,
+    ttl: TOKEN_TTL,
+  });
+  token.addGrant({
+    room: LIVEKIT_ROOM,
+    roomJoin: true,
+    canPublish: true,
+    canPublishSources: [TrackSource.MICROPHONE],
+    canSubscribe: true,
+    canPublishData: false,
+  });
+  return token.toJwt();
 }
