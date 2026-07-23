@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>pixelhub</title>
+    <link rel="stylesheet" href="/src/style.css" />
+  </head>
+  <body>
+    <div id="app">
+      <div id="game"></div>
+      <aside id="chat" class="chat hidden">
+        <div class="chat__nearby">
+          <h2>In range</h2>
+          <ul id="nearby-list"></ul>
+        </div>
+        <ul id="chat-messages" class="chat__messages"></ul>
+        <form id="chat-form" class="chat__form" autocomplete="off">
+          <input
+            id="chat-input"
+            type="text"
+            maxlength="500"
+            placeholder="Say something to people nearby..."
+          />
+          <button type="submit">Send</button>
+        </form>
+      </aside>
+    </div>
+    <div id="join" class="join">
+      <form id="join-form" class="join__card">
+        <h1>pixelhub</h1>
+        <p>Walk around, get close to people, and chat.</p>
+        <input
+          id="join-name"
+          type="text"
+          maxlength="20"
+          placeholder="Your display name"
+          autofocus
+        />
+        <button type="submit">Enter the world</button>
+        <p id="join-error" class="join__error" role="alert"></p>
+      </form>
+    </div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
