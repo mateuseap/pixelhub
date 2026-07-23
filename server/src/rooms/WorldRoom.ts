@@ -25,6 +25,12 @@ import {
 } from '@pixelhub/shared';
 import { Client, Room, ServerError } from 'colyseus';
 import { issueLiveKitToken } from '../audio/livekit';
+import {
+  chatMessagesTotal,
+  playersConnected,
+  playersJoinedTotal,
+  voiceTokensIssuedTotal,
+} from '../metrics';
 import { loadConfig, type LiveKitConfig } from '../config';
 import { Player, WorldState } from './schema/WorldState';
 
@@ -82,6 +88,8 @@ export class WorldRoom extends Room<WorldState> {
     this.state.players.set(client.sessionId, player);
 
     this.sessions.set(client.sessionId, { input: IDLE_INPUT, chatLimit: EMPTY_RATE_LIMIT });
+    playersConnected.set(this.sessions.size);
+    playersJoinedTotal.inc();
     this.sendAudioToken(client, auth.name);
   }
 
@@ -102,6 +110,7 @@ export class WorldRoom extends Room<WorldState> {
         }
         const payload: AudioTokenPayload = { token, url: livekit.url };
         client.send(MessageType.AudioToken, payload);
+        voiceTokensIssuedTotal.inc();
       })
       .catch((error: unknown) => {
         // eslint-disable-next-line no-console
@@ -112,6 +121,7 @@ export class WorldRoom extends Room<WorldState> {
   onLeave(client: Client): void {
     this.state.players.delete(client.sessionId);
     this.sessions.delete(client.sessionId);
+    playersConnected.set(this.sessions.size);
   }
 
   /** One simulation tick. Public so tests can drive it deterministically. */
@@ -162,6 +172,7 @@ export class WorldRoom extends Room<WorldState> {
       ([id, p]) => [id, { x: p.x, y: p.y }] as const,
     );
     const recipients = new Set(filterChatRecipients({ x: sender.x, y: sender.y }, roster));
+    chatMessagesTotal.inc();
 
     const message: ChatBroadcast = {
       senderId: client.sessionId,
