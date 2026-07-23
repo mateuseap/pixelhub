@@ -73,7 +73,7 @@ Voice is opt-in per deployment. Without configuration the world runs silently an
 | `LIVEKIT_API_KEY` | API key id used to sign access tokens |
 | `LIVEKIT_API_SECRET` | API secret used to sign access tokens |
 
-When set, the server sends each player a scoped LiveKit token after join. The client shows an "Enable voice" button (microphone permission is requested only then), publishes audio-only, and subscribes exclusively to players within the proximity radius, with playback volume falling off linearly with distance. Speaking players get a green ring under their avatar.
+When set, the server sends each player a scoped LiveKit token after join. The client shows an "Enable voice" button (microphone permission is requested only then), publishes audio-only, and subscribes exclusively to players within the proximity radius, with playback volume falling off linearly with distance. Speaking players get a green ring under their avatar. The choice persists: after a page refresh the client reconnects to voice by itself (the browser only re-asks for the microphone if permission was granted one time only).
 
 ## Stack
 
