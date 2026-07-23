@@ -6,8 +6,8 @@
 2D pixel world · Proximity chat · Self-hosted
 
 [![CI](https://github.com/mateuseap/pixelhub/actions/workflows/publish-images.yml/badge.svg)](https://github.com/mateuseap/pixelhub/actions)
-[![license](https://img.shields.io/github/license/mateuseap/pixelhub?style=flat-square&color=5ba3b0)](LICENSE)
-[![stars](https://img.shields.io/github/stars/mateuseap/pixelhub?style=flat-square)](https://github.com/mateuseap/pixelhub/stargazers)
+[![license](https://badgen.net/github/license/mateuseap/pixelhub?color=5ba3b0)](LICENSE)
+[![stars](https://badgen.net/github/stars/mateuseap/pixelhub)](https://github.com/mateuseap/pixelhub/stargazers)
 [![visitors](https://visitor-badge.laobi.icu/badge?page_id=mateuseap.pixelhub)](https://github.com/mateuseap/pixelhub)
 
 <br />
