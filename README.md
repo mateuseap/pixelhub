@@ -99,7 +99,22 @@ When set, the server sends each player a scoped LiveKit token after join. The cl
 
 | Doc | Description |
 |-----|------------|
-| [Architecture](docs/ARCHITECTURE.md) | Runtime diagram, core loop, constraints |
+| [System Overview](docs/architecture/overview.md) | Architecture diagram, the three packages, component map |
+| [System Design](docs/architecture/system-design.md) | Tick loop, state sync, prediction, proximity pipeline, LiveKit token flow |
+| [ADRs](docs/adr/) | Stack choice, server-authoritative movement, proximity model, audio-only voice |
+| [Development Setup](docs/development/setup.md) | Local dev, workspace layout, the Vite `/colyseus` proxy, conventions |
+| [Deployment Guide](docs/deployment/setup.md) | GHCR images, homelab manifests, LiveKit ports, env vars, Nginx proxy |
+| [Testing](docs/testing.md) | Test layout, the client LiveKit fake, coverage, how to run |
+| [Security](docs/security/security.md) | Server authority, chat filtering, rate limits, token least-privilege, secrets |
+| [References](docs/references.md) | Curated study links for the whole stack |
+
+## Contributing
+
+Read [CONTRIBUTING.md](CONTRIBUTING.md) before opening a PR. Branch from `main`, use Conventional Commits, keep the test suite green, and assign **@mateuseap** for review.
+
+## Learn more
+
+New to any part of the stack? [docs/references.md](docs/references.md) is a curated set of official study links for Phaser 3, Colyseus, LiveKit and WebRTC, pnpm workspaces, Vite, Vitest, TypeScript, WebSockets, and Docker, so you can learn every layer of PixelHub from primary sources.
 
 ## License
 
