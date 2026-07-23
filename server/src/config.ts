@@ -20,7 +20,7 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): ServerConfig {
     throw new Error(`Invalid PORT: ${rawPort}`);
   }
 
-  // TODO(M3 — proximity audio): when LIVEKIT_* are set, the server will issue
+  // TODO(M3, proximity audio): when LIVEKIT_* are set, the server will issue
   // LiveKit access tokens scoped per room/participant. See src/audio/livekit.ts.
   const livekit =
     env.LIVEKIT_URL && env.LIVEKIT_API_KEY && env.LIVEKIT_API_SECRET

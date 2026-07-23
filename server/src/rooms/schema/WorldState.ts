@@ -1,7 +1,7 @@
 import { MapSchema, Schema, type } from '@colyseus/schema';
 
 /**
- * Synchronized player state. Colyseus schemas are mutable by design — this is
+ * Synchronized player state. Colyseus schemas are mutable by design. This is
  * the one place where in-place updates are the framework contract.
  */
 export class Player extends Schema {
