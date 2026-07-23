@@ -28,6 +28,7 @@ export class PlayerSprite {
   private bubbleBg: Phaser.GameObjects.Graphics | null = null;
   private bubbleText: Phaser.GameObjects.Text | null = null;
   private bubbleTimer: Phaser.Time.TimerEvent | null = null;
+  private speakingRing: Phaser.GameObjects.Ellipse | null = null;
 
   constructor(scene: Phaser.Scene, x: number, y: number, name: string, color: string) {
     this.scene = scene;
@@ -62,6 +63,18 @@ export class PlayerSprite {
   setPosition(x: number, y: number): void {
     this.container.setPosition(x, y);
     this.container.setDepth(y);
+  }
+
+  /** Shows or hides the green voice ring under the avatar while speaking. */
+  setSpeaking(speaking: boolean): void {
+    if (speaking && !this.speakingRing) {
+      this.speakingRing = this.scene.add
+        .ellipse(0, FEET_Y + 1, 22, 10)
+        .setStrokeStyle(1.5, 0x6fbf8f, 0.9)
+        .setFillStyle(0x6fbf8f, 0.12);
+      this.container.addAt(this.speakingRing, 0);
+    }
+    this.speakingRing?.setVisible(speaking);
   }
 
   get x(): number {

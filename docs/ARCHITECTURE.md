@@ -26,3 +26,22 @@ Colyseus room server ──── issues LiveKit tokens
   users realistic for v1.
 - Deploys as `apps/pixelhub/` manifests in the homelab repo; images from GHCR
   via the same CI pattern as chesskernel.
+
+## Voice (M3, implemented)
+
+```
+Browser A                    Colyseus room                LiveKit SFU
+   |  join                        |                            |
+   |------------------------------>                            |
+   |  audio-token (scoped JWT)    |                            |
+   <------------------------------|                            |
+   |  Enable voice (user gesture) |                            |
+   |------------------------------------------------------------>
+   |  publish mic (Opus)          |                            |
+   |  subscribe only to peers within PROXIMITY_RADIUS          |
+   |  volume per peer = linear falloff with tile distance      |
+```
+
+- The server issues a LiveKit token per player on join (identity = sessionId, publish audio only). Voice env vars absent: no token message, no UI, zero behavior change.
+- `shared/src/proximityAudio.ts` is the pure core: `audioGainForDistance` (1.0 inside 1 tile, linear to 0 at the radius) and `computeAudioPeers` (in-range set with gains). Client applies it every 300 ms: subscribe/unsubscribe plus `participant.setVolume(gain)`.
+- Everyone shares one SFU room; audibility is a client-side subscription decision driven by server-authoritative positions. Audio-only keeps the 1 vCPU host comfortable.

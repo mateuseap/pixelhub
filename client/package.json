@@ -12,6 +12,7 @@
   "dependencies": {
     "@pixelhub/shared": "workspace:*",
     "colyseus.js": "^0.15.28",
+    "livekit-client": "^2.20.2",
     "phaser": "^3.90.0"
   },
   "devDependencies": {

@@ -1,10 +1,20 @@
 import Phaser from 'phaser';
-import { MessageType, type ChatBroadcast, type ChatError } from '@pixelhub/shared';
+import {
+  MessageType,
+  computeAudioPeers,
+  type AudioTokenPayload,
+  type ChatBroadcast,
+  type ChatError,
+  type Position,
+} from '@pixelhub/shared';
 import type { Room } from 'colyseus.js';
+import { VoiceManager } from './audio/voiceManager';
 import { WorldScene } from './game/WorldScene';
 import { joinWorld } from './net/connection';
+import { playersOf } from './net/roomState';
 import { setupChatPanel } from './ui/chatPanel';
 import { setupJoinScreen } from './ui/joinScreen';
+import { setupVoiceControls } from './ui/voiceControls';
 
 const NEARBY_REFRESH_MS = 300;
 
@@ -78,6 +88,66 @@ function startGame(room: Room): void {
 
   window.setInterval(() => {
     chat.setNearby(scene.getNearbyNames());
+  }, NEARBY_REFRESH_MS);
+
+  setupVoice(room, scene);
+}
+
+/**
+ * Wires proximity voice: the server sends LiveKit credentials only when
+ * voice is configured, so a voiceless deployment never shows the UI.
+ */
+function setupVoice(room: Room, scene: WorldScene): void {
+  const applySpeakingStates = (): void => {
+    const speaking = new Set<string>();
+    voice.getPeerStates().forEach((view, identity) => {
+      if (view.speaking) {
+        speaking.add(identity);
+      }
+    });
+    if (voice.getLocalState().speaking) {
+      speaking.add(room.sessionId);
+    }
+    scene.applySpeaking(speaking);
+  };
+
+  const controls = setupVoiceControls({
+    onToggle: () => {
+      void voice.toggle();
+    },
+  });
+  const voice = new VoiceManager({
+    onStatusChanged: (status, detail) => controls.setStatus(status, detail),
+    onPeersChanged: applySpeakingStates,
+  });
+
+  room.onMessage(MessageType.AudioToken, (payload: AudioTokenPayload) => {
+    voice.setCredentials(payload);
+    controls.show();
+    controls.setStatus('off');
+  });
+  room.onLeave(() => {
+    void voice.disconnect();
+  });
+
+  window.setInterval(() => {
+    if (!voice.available) {
+      return;
+    }
+    const players = playersOf(room);
+    const localPlayer = players.get(room.sessionId);
+    if (!localPlayer) {
+      return;
+    }
+    const listener: Position = { x: localPlayer.x, y: localPlayer.y };
+    const peers: Array<readonly [string, Position]> = [];
+    players.forEach((player, sessionId) => {
+      if (sessionId !== room.sessionId) {
+        peers.push([sessionId, { x: player.x, y: player.y }] as const);
+      }
+    });
+    voice.applyProximity(computeAudioPeers(listener, peers));
+    applySpeakingStates();
   }, NEARBY_REFRESH_MS);
 }
 

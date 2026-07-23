@@ -4,5 +4,6 @@ export * from './map';
 export * from './collision';
 export * from './movement';
 export * from './proximity';
+export * from './proximityAudio';
 export * from './validation';
 export * from './rateLimit';
