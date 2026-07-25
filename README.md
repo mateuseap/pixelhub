@@ -12,7 +12,7 @@
 [![stars](https://badgen.net/github/stars/mateuseap/pixelhub)](https://github.com/mateuseap/pixelhub/stargazers)
 [![visitors](https://visitor-badge.laobi.icu/badge?page_id=mateuseap.pixelhub)](https://github.com/mateuseap/pixelhub)
 
-<img src="docs/assets/preview.svg" width="720" alt="PixelHub: a walkable 2D pixel world with proximity chat" />
+<img src="docs/assets/preview.png" width="720" alt="PixelHub: a walkable 2D pixel world with proximity chat" />
 
 <br />
 
