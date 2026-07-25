@@ -14,6 +14,10 @@
 
 <br />
 
+<img src="docs/assets/preview.png" width="720" alt="PixelHub: a walkable 2D pixel world with proximity chat" />
+
+<br />
+
 </div>
 
 ---
