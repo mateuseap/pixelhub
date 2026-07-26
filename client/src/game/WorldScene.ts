@@ -31,10 +31,16 @@ export class WorldScene extends Phaser.Scene {
   private keys: Record<string, Phaser.Input.Keyboard.Key> = {};
   private lastSent: MovementInput = IDLE_INPUT;
   private predicted: Position | null = null;
+  private touchInput: (() => MovementInput) | null = null;
 
   constructor(room: Room) {
     super('world');
     this.room = room;
+  }
+
+  /** Wires an on-screen joystick (or any external source) into movement input. */
+  setTouchInputSource(source: () => MovementInput): void {
+    this.touchInput = source;
   }
 
   create(): void {
@@ -161,11 +167,12 @@ export class WorldScene extends Phaser.Scene {
     }
     const k = this.keys;
     const down = (name: string): boolean => k[name]?.isDown === true;
+    const touch = this.touchInput?.() ?? IDLE_INPUT;
     return {
-      up: down('W') || down('UP'),
-      down: down('S') || down('DOWN'),
-      left: down('A') || down('LEFT'),
-      right: down('D') || down('RIGHT'),
+      up: down('W') || down('UP') || touch.up,
+      down: down('S') || down('DOWN') || touch.down,
+      left: down('A') || down('LEFT') || touch.left,
+      right: down('D') || down('RIGHT') || touch.right,
     };
   }
 }

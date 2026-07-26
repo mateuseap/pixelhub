@@ -13,7 +13,7 @@ The **server is the sole authority** for every player's position. Clients never 
 
 ### Flow
 
-1. The client reads the keyboard each frame and sends a `MovementInput` (`{up, down, left, right}` booleans) over the Colyseus message channel, but only when the intent changes, not every frame.
+1. The client reads the keyboard (and, on touch devices, an on-screen joystick) each frame and sends a `MovementInput` (`{up, down, left, right}` booleans) over the Colyseus message channel, but only when the intent changes, not every frame.
 2. The server sanitizes the payload into a safe `MovementInput` (`sanitizeInput` coerces anything untrusted into four booleans) and stores it as that session's current intent.
 3. On every simulation tick the server advances each player from its own authoritative position using `stepPlayer(map, pos, input, dt)`: it normalizes the direction (diagonals are not faster), clamps to the world bounds, and resolves each axis independently against the tile collision map so players slide along walls but never enter them.
 4. The new position is written to the Colyseus schema state, which binary-encodes the delta and syncs it to every client.

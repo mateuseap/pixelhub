@@ -2,7 +2,7 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <meta name="description" content="A tiny 2D world: walk around, get close to people, and chat." />
     <title>pixelhub</title>
     <link
@@ -14,6 +14,13 @@
   <body>
     <div id="app">
       <div id="game"></div>
+      <div id="touch-joystick" class="joystick hidden" aria-hidden="true">
+        <div class="joystick__base">
+          <div class="joystick__knob"></div>
+        </div>
+      </div>
+      <button id="chat-toggle" class="chat-toggle" type="button" aria-label="Toggle chat">💬</button>
+      <div id="chat-backdrop" class="chat-backdrop hidden"></div>
       <aside id="chat" class="chat hidden">
         <div class="chat__brand">pixelhub</div>
         <div class="chat__nearby">
@@ -49,7 +56,8 @@
           autofocus
         />
         <button type="submit">Enter the world</button>
-        <p class="join__hint">Move with <kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> or the arrow keys</p>
+        <p class="join__hint join__hint--keyboard">Move with <kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> or the arrow keys</p>
+        <p class="join__hint join__hint--touch">Use the on-screen joystick to move</p>
         <p id="join-error" class="join__error" role="alert"></p>
       </form>
     </div>

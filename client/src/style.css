@@ -305,6 +305,20 @@ kbd {
   font-size: 0.78rem !important;
 }
 
+.join__hint--touch {
+  display: none;
+}
+
+@media (pointer: coarse) {
+  .join__hint--keyboard {
+    display: none;
+  }
+
+  .join__hint--touch {
+    display: block;
+  }
+}
+
 .join__error {
   color: var(--error) !important;
   min-height: 1.2em;
@@ -359,4 +373,126 @@ kbd {
 
 .voice__status.error {
   color: #e07a6a;
+}
+
+/* --- Touch joystick (coarse-pointer devices only) --- */
+.joystick {
+  position: fixed;
+  left: max(20px, env(safe-area-inset-left));
+  bottom: max(20px, env(safe-area-inset-bottom));
+  width: 110px;
+  height: 110px;
+  z-index: 15;
+  touch-action: none;
+}
+
+.joystick__base {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: rgba(33, 26, 43, 0.55);
+  border: 2px solid rgba(242, 234, 216, 0.25);
+  backdrop-filter: blur(2px);
+}
+
+.joystick__knob {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 46px;
+  height: 46px;
+  margin: -23px 0 0 -23px;
+  border-radius: 50%;
+  background: var(--accent);
+  border: 2px solid var(--accent-hover);
+  transition: transform 0.05s linear;
+  will-change: transform;
+}
+
+/* --- Mobile chat toggle + backdrop --- */
+.chat-toggle {
+  display: none;
+  position: fixed;
+  top: max(14px, env(safe-area-inset-top));
+  right: max(14px, env(safe-area-inset-right));
+  z-index: 16;
+  width: 44px;
+  height: 44px;
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  background: var(--panel);
+  color: var(--text);
+  font-size: 1.1rem;
+  line-height: 1;
+  cursor: pointer;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35);
+}
+
+.chat-backdrop {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  z-index: 17;
+}
+
+.chat-backdrop.hidden {
+  display: none !important;
+}
+
+/* --- Mobile layout: game fills the screen, chat becomes a slide-in drawer --- */
+@media (max-width: 700px), (max-height: 480px) and (orientation: landscape) {
+  #app {
+    position: relative;
+  }
+
+  #game {
+    width: 100%;
+  }
+
+  .chat-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .chat {
+    position: fixed;
+    inset: 0 0 0 auto;
+    width: min(320px, 88vw);
+    z-index: 18;
+    transform: translateX(100%);
+    transition: transform 0.22s ease;
+    box-shadow: -8px 0 24px rgba(0, 0, 0, 0.45);
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  .chat.chat--open {
+    transform: translateX(0);
+  }
+
+  .chat-backdrop:not(.hidden) {
+    display: block;
+  }
+
+  .join__card {
+    padding: 28px 20px 22px;
+  }
+
+  .join__card input,
+  .join__card button {
+    min-height: 44px;
+  }
+
+  /* 16px inputs stop iOS Safari from auto-zooming the page on focus. */
+  .chat__form input {
+    font-size: 16px;
+    padding: 12px 14px;
+  }
+
+  .chat__form button,
+  .voice__button {
+    min-height: 44px;
+  }
 }

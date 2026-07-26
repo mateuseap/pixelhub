@@ -3,6 +3,8 @@ import type { ChatBroadcast } from '@pixelhub/shared';
 import { setupChatPanel, type ChatPanel } from '../src/ui/chatPanel';
 
 const FIXTURE = `
+  <button id="chat-toggle" type="button">Chat</button>
+  <div id="chat-backdrop" class="chat-backdrop hidden"></div>
   <aside id="chat" class="chat hidden">
     <ul id="nearby-list"></ul>
     <ul id="chat-messages"></ul>
@@ -150,5 +152,43 @@ describe('panel visibility', () => {
     expect(chat.classList.contains('hidden')).toBe(true);
     panel.show();
     expect(chat.classList.contains('hidden')).toBe(false);
+  });
+});
+
+describe('mobile chat drawer', () => {
+  function chatEl(): HTMLElement {
+    return document.getElementById('chat') as HTMLElement;
+  }
+
+  function backdropEl(): HTMLElement {
+    return document.getElementById('chat-backdrop') as HTMLElement;
+  }
+
+  function click(el: Element): void {
+    el.dispatchEvent(new Event('click', { bubbles: true, cancelable: true }));
+  }
+
+  it('opens the drawer and shows the backdrop when the toggle is tapped', () => {
+    click(document.getElementById('chat-toggle') as HTMLElement);
+
+    expect(chatEl().classList.contains('chat--open')).toBe(true);
+    expect(backdropEl().classList.contains('hidden')).toBe(false);
+  });
+
+  it('closes the drawer on a second tap of the toggle', () => {
+    const toggle = document.getElementById('chat-toggle') as HTMLElement;
+    click(toggle);
+    click(toggle);
+
+    expect(chatEl().classList.contains('chat--open')).toBe(false);
+    expect(backdropEl().classList.contains('hidden')).toBe(true);
+  });
+
+  it('closes the drawer when the backdrop is tapped', () => {
+    click(document.getElementById('chat-toggle') as HTMLElement);
+    click(backdropEl());
+
+    expect(chatEl().classList.contains('chat--open')).toBe(false);
+    expect(backdropEl().classList.contains('hidden')).toBe(true);
   });
 });

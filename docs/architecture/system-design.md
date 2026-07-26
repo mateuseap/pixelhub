@@ -58,7 +58,7 @@ A raw 20 Hz feed would look choppy and lag the local player behind their own key
 ```mermaid
 flowchart LR
     subgraph Local["Local avatar: prediction"]
-        Keys["Read keyboard each frame"] --> Predict["stepPlayer (same shared code)"]
+        Keys["Read keyboard + touch joystick each frame"] --> Predict["stepPlayer (same shared code)"]
         Predict --> Correct["Ease toward latest<br/>server position (small factor)"]
     end
     subgraph Remote["Remote avatars: interpolation"]
