@@ -14,6 +14,7 @@ import { joinWorld } from './net/connection';
 import { playersOf } from './net/roomState';
 import { setupChatPanel } from './ui/chatPanel';
 import { setupJoinScreen } from './ui/joinScreen';
+import { setupTouchControls } from './ui/touchControls';
 import { setupVoiceControls } from './ui/voiceControls';
 
 const NEARBY_REFRESH_MS = 300;
@@ -27,6 +28,8 @@ const RENDER_ZOOM = 2;
 
 function startGame(room: Room): void {
   const scene = new WorldScene(room);
+  const touchControls = setupTouchControls();
+  scene.setTouchInputSource(touchControls.read);
 
   const parent = document.getElementById('game');
   if (!parent) {
